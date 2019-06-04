@@ -44,7 +44,7 @@ namespace dacin{ namespace lp{
             return ret;
         }
 
-        Lp_Result seidel_rec(Lp_Instance lp){
+        Lp_Result seidel_rec(Lp_Instance lp, const bool move_to_front, const size_t front_size = 0){
             const int n = lp.n(), d = lp.d();
             if(d == 0){
                 Lp_Result ret(Lp_Status::OPTIMAL, {Num(1)}, {Num(0)}, Fraction(0));
@@ -92,9 +92,10 @@ namespace dacin{ namespace lp{
             } else {
                 {
                     auto &A = const_cast<std::vector<std::vector<Num>>&>(lp.get_A());
-                    std::shuffle(A.begin(), A.end(), rng);
+                    std::shuffle(A.begin() + std::min(front_size, A.size()), A.end(), rng);
                 }
                 Lp_Result ret = get_base_result();
+                vector<int> moved_indices;
                 for(int i=0;i<n;++i){
                     auto const&e = lp.get_A()[i];
                     if(ret.violates(e)){
@@ -103,24 +104,29 @@ namespace dacin{ namespace lp{
                         auto const plane = projection.first;
                         const int k = projection.second;
                         std::vector<std::vector<Num> > A_sub;
+                        for(auto it = moved_indices.rbegin(); it != moved_indices.rend();++it){
+                            A_sub.push_back(std::move(project_down(lp.get_A()[*it], plane, k)));
+                        }
                         for(int j=0;j<i;++j){
                             A_sub.push_back(std::move(project_down(lp.get_A()[j], plane, k)));
                         }
                         std::vector<Num> c_sub = project_down(lp.get_c(), plane, k);
-                        Lp_Result sub_result = seidel_rec(std::move(Lp_Instance(std::move(A_sub), std::move(c_sub))));
+                        Lp_Result sub_result = seidel_rec(std::move(Lp_Instance(std::move(A_sub), std::move(c_sub))), move_to_front, front_size + moved_indices.size());
                         if(!sub_result.is_feasible()) return sub_result;
                         ret = sub_result;
                         ret.set_x(project_up(sub_result.get_x(), plane, k));
                         ret.set_ray(project_up(sub_result.get_ray(), plane, k));
+                        if(move_to_front) moved_indices.push_back(i);
                     }
                 }
                 return ret;
             }
         }
     }
+    template<bool move_to_front = false>
     Lp_Result solve_seidel(Lp_Instance lp){
         auto const c = lp.get_c();
-        auto res = detail::seidel_rec(std::move(lp));
+        auto res = detail::seidel_rec(std::move(lp), move_to_front);
         res.reduce_all();
         res.recalc_objective(c);
         return res;

@@ -121,30 +121,31 @@ namespace dacin{ namespace lp{
         test_from_file("examples/enclosing_annulus_spherical_3_50.lp", solver);
         test_from_file("examples/enclosing_annulus_spherical_4_50.lp", solver);
         }
-        if(1){
+        if(0){
         test_from_file("examples/enclosing_annulus_2_1000.lp", solver);
         test_from_file("examples/enclosing_annulus_2_10000.lp", solver);
         test_from_file("examples/enclosing_annulus_3_1000.lp", solver);
         test_from_file("examples/enclosing_annulus_3_10000.lp", solver);
         }
-        if(1){
+        if(0){
         test_from_file("examples/enclosing_annulus_spherical_2_1000.lp", solver);
         test_from_file("examples/enclosing_annulus_spherical_2_10000.lp", solver);
         test_from_file("examples/enclosing_annulus_spherical_3_1000.lp", solver);
         test_from_file("examples/enclosing_annulus_spherical_3_10000.lp", solver);
         }
-        test_from_file("examples/enclosing_annulus_3_10000.lp", solver);
-        test_from_file("examples/enclosing_annulus_3_10000.lp", solver);
-        test_from_file("examples/enclosing_annulus_3_10000.lp", solver);
-        test_from_file("examples/enclosing_annulus_spherical_3_10000.lp", solver);
-        test_from_file("examples/enclosing_annulus_spherical_3_10000.lp", solver);
-        test_from_file("examples/enclosing_annulus_spherical_3_10000.lp", solver);
+        if(1){
+            for(int it=0;it<5;++it){
+                test_from_file("examples/enclosing_annulus_3_10000.lp", solver);
+                test_from_file("examples/enclosing_annulus_spherical_3_10000.lp", solver);
+            }
+        }
     }
     void run_tests(){
         //run_tests_annulus(solve_seidel);
-        //run_tests_annulus([](Lp_Instance lp){return solve_clarkson(move(lp), solve_seidel);});
+        run_tests_annulus([](Lp_Instance lp){return solve_clarkson(move(lp), solve_seidel);});
+        run_tests_annulus([](Lp_Instance lp){return solve_clarkson(move(lp), solve_seidel<true>);});
         //run_tests_annulus(solve_simplex);
-        run_tests_annulus([](Lp_Instance lp){return solve_clarkson(move(lp), solve_simplex);});
+        //run_tests_annulus([](Lp_Instance lp){return solve_clarkson(move(lp), solve_simplex);});
     }
 
 } }

@@ -107,8 +107,9 @@ namespace dacin{ namespace lp{
         return res;
     }
 
+    template<bool move_to_front = false>
     Lp_Result solve_clarkson_seidel(Lp_Instance const&lp){
-        return solve_clarkson(lp, solve_seidel);
+        return solve_clarkson(lp, solve_seidel<move_to_front>);
     }
     Lp_Result solve_clarkson_simplex(Lp_Instance const&lp){
         return solve_clarkson(lp, solve_simplex);
